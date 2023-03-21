@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15.2
+    user: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 1s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+
+  hashcat:
+    container_name: hashcat
+    image: dizcza/docker-hashcat:cuda
+    command: bash -c "tail -f /dev/null"
+    networks:
+      - my-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  hydra:
+    container_name: hydra
+    build:
+      context: .
+      dockerfile: docker/hydra/Dockerfile
+    entrypoint: ""
+    command: bash -c "tail -f /dev/null"
+    networks:
+      - my-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  my-network:
+    driver: bridge
