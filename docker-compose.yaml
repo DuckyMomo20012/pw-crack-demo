@@ -34,6 +34,8 @@ services:
       dockerfile: docker/hydra/Dockerfile
     entrypoint: ""
     command: bash -c "tail -f /dev/null"
+    volumes:
+      - ./configs/hydra/:/var/configs/
     networks:
       - my-network
     depends_on:
