@@ -19,10 +19,18 @@ services:
 
   hashcat:
     container_name: hashcat
-    image: dizcza/docker-hashcat:cuda
+    image: dizcza/docker-hashcat:latest
     command: bash -c "tail -f /dev/null"
     networks:
       - my-network
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     depends_on:
       postgres:
         condition: service_healthy
