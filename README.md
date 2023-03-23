@@ -1,10 +1,9 @@
 <div align="center">
 
-  <img src="public/img/react.svg" alt="logo" width="200" height="auto" />
   <h1>Password Cracking Demo</h1>
 
   <p>
-    Proof of concept for Hydra and Hashcat
+    Demo for Hydra and Hashcat
   </p>
 
 <!-- Badges -->
@@ -69,9 +68,7 @@
 
 ### :dart: Features
 
-- Feature 1.
-- Feature 2.
-- Feature 3.
+- Setup `postgres` and `ssh` service for Hydra.
 
 <!-- Env Variables -->
 
@@ -147,13 +144,13 @@ variables.
   sudo usermod -aG docker $USER
   ```
 
-- `nvidia` drivers:
+- `nvidia` drivers: Required for the `hashcat` container.
 
   ```bash
   sudo ubuntu-drivers autoinstall
   ```
 
-- `cuda toolkit`:
+- `cuda toolkit` driver: Required for the `hashcat` container.
 
   ```bash
   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
@@ -194,7 +191,9 @@ variables.
   +-----------------------------------------------------------------------------+
   ```
 
-- `nvidia-container-toolkit`:
+- `nvidia-container-toolkit`: Required for the `hashcat` container to access the
+  GPU hardware. If you install the `hashcat` tool to your host machine, you can
+  skip this step.
 
   Ref: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit
 
@@ -281,24 +280,39 @@ docker compose down -v
 
 ## :eyes: Usage
 
-Use this space to tell a little more about your project and how it can be used.
-Show additional screenshots, code samples, demos, or links to other resources.
+### Hydra
 
-```jsx
-// foo.jsx
-import Component from "react-template";
+The config files for `hydra` container is mounted from `configs/hydra/` to
+`/var/configs/` directory:
 
-function App() {
-  return <Component />;
-}
-```
+- `pg`: The config files to crack sample PostgreSQL database.
+
+  - `pwlist.txt`: The `login:password` list to crack the database. The default
+    postgres password is defined in `.env` file, using `POSTGRES_PASSWORD`
+    variable.
+  - `servers.txt`: The server list to crack the database. The default server is
+    with the host `postgres` (which is the container name) and port `5432`.
+
+    > **Note**: Since the `hydra` and `postgres` containers are in the same
+    > network, so they can communicate with each other using the container name
+    > for simplicity, instead of using the IP address.
+
+  - `run.sh`: The script to run `hydra` to crack the database.
+
+The container is also configured to use the `ssh` service, so you can test to
+crack the password of your local machine.
+
+### Hashcat
+
+We haven't setup any config files for `hashcat` container yet. You can use
+examples provided by `hashcat` to test the container, which in the `hashcat`
+directory.
 
 <!-- Roadmap -->
 
 ## :compass: Roadmap
 
-- [x] Todo 1.
-- [ ] Todo 2.
+- [x] Setup `hashcat` container to crack WPA/WPA2 password.
 
 <!-- Contributing -->
 
@@ -320,13 +334,10 @@ Please read the [Code of Conduct](https://github.com/DuckyMomo20012/pw-crack-dem
 
 ## :grey_question: FAQ
 
-- Question 1
+- How can I setup more services for `hydra` to crack?
 
-  - Answer 1.
-
-- Question 2
-
-  - Answer 2.
+  - You can install the required library for the service you want to crack in
+    the `docker/hydra/Dockerfile` file and rebuild the image.
 
 <!-- License -->
 
